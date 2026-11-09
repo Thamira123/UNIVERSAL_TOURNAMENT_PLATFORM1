@@ -1,6 +1,19 @@
 ﻿import { Controller, Get, ServiceUnavailableException } from "@nestjs/common";
 import { Neo4jService } from "../neo4j/neo4j.service";
 
+@Controller()
+export class ApiController {
+  @Get()
+  getApiInfo() {
+    return {
+      service: "tournament-api",
+      status: "ok",
+      health: "/api/health",
+      databaseHealth: "/api/health/neo4j",
+    };
+  }
+}
+
 @Controller("health")
 export class HealthController {
   constructor(private readonly neo4j: Neo4jService) {}

@@ -5,6 +5,7 @@ export interface SessionUser {
   id: string;
   email: string;
   name: string;
+  role: "USER" | "ADMIN";
 }
 
 export const CurrentUser = createParamDecorator((_data: unknown, context: ExecutionContext): SessionUser => {

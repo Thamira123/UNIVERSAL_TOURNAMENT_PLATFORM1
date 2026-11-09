@@ -8,7 +8,7 @@ import { EventsService } from "./events.service";
 export class EventsController {
   constructor(private readonly events: EventsService) {}
 
-  @Get("events/:id") getOne(@Param("id") id: string) { return this.events.getOne(id); }
+  @Get("events/:id") getOne(@Param("id") id: string, @CurrentUser() user: SessionUser) { return this.events.getOne(id, user.id); }
   @Patch("events/:id") update(@Param("id") id: string, @Body() body: unknown, @CurrentUser() user: SessionUser) { return this.events.update(id, body, user.id); }
   @Post("events/:id/stages") addStage(@Param("id") id: string, @Body() body: unknown, @CurrentUser() user: SessionUser) { return this.events.addStage(id, body, user.id); }
   @Post("stages/:id/rounds") addRound(@Param("id") id: string, @Body() body: unknown, @CurrentUser() user: SessionUser) { return this.events.addRound(id, body, user.id); }

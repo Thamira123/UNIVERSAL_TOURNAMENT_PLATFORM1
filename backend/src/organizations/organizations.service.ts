@@ -1,6 +1,6 @@
 ﻿import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
-import { inputObject, optionalText, textField } from "../common/input";
+import { inputObject, isValidDateOnly, optionalText, textField } from "../common/input";
 import type { SessionUser } from "../auth/current-user.decorator";
 import { Neo4jService } from "../neo4j/neo4j.service";
 
@@ -50,16 +50,17 @@ export class OrganizationsService {
     const record = result.records[0];
     if (!record) throw new NotFoundException("Organization not found.");
     const membership = await this.neo4j.run("MATCH (u:User {id:$userId})-[r:ORG_MEMBER]->(o:Organization {id:$id}) RETURN r.role AS role", { userId, id });
-    if (!membership.records.length) throw new ForbiddenException("You need to belong to this organization to view its workspace.");
-    return { organization: record.get("organization"), role: membership.records[0].get("role"), admins: (record.get("members") as { role: string }[]).filter((member) => ["OWNER", "ADMIN"].includes(member.role)), tournaments: record.get("tournaments") };
+    const platformAdmin = await this.isPlatformAdmin(userId);
+    if (!membership.records.length && !platformAdmin) throw new ForbiddenException("You need to belong to this organization to view its workspace.");
+    return { organization: record.get("organization"), role: platformAdmin ? "ADMIN" : membership.records[0].get("role"), isPlatformAdmin: platformAdmin, admins: (record.get("members") as { role: string }[]).filter((member) => ["OWNER", "ADMIN"].includes(member.role)), tournaments: record.get("tournaments") };
   }
 
   async addAdmin(id: string, value: unknown, userId: string) {
     const body = inputObject(value);
     const email = textField(body, "email", 254).toLowerCase();
     const result = await this.neo4j.run(`
-      MATCH (actor:User {id:$userId})-[actorRole:ORG_MEMBER]->(o:Organization {id:$id})
-      WHERE actorRole.role IN ['OWNER','ADMIN']
+      MATCH (actor:User {id:$userId}), (o:Organization {id:$id})
+      WHERE actor.role='ADMIN' OR EXISTS { MATCH (actor)-[actorRole:ORG_MEMBER]->(o) WHERE actorRole.role IN ['OWNER','ADMIN'] }
       MATCH (member:User {email:$email})
       MERGE (member)-[membership:ORG_MEMBER]->(o)
       ON CREATE SET membership.role='ADMIN', membership.joinedAt=datetime()
@@ -89,9 +90,9 @@ export class OrganizationsService {
     const sportKey = optionalText(body, "sportKey", 30).toLowerCase();
     if (sportKey && !["cricket", "high-jump"].includes(sportKey)) throw new BadRequestException("Choose Cricket or High Jump.");
     const startDate = textField(body, "startDate", 10);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || Number.isNaN(Date.parse(`${startDate}T00:00:00Z`))) throw new BadRequestException("startDate must use YYYY-MM-DD format.");
+    if (!isValidDateOnly(startDate)) throw new BadRequestException("startDate must use YYYY-MM-DD format.");
     const endDate = optionalText(body, "endDate", 10);
-    if (endDate && (!/^\d{4}-\d{2}-\d{2}$/.test(endDate) || Number.isNaN(Date.parse(`${endDate}T00:00:00Z`)))) throw new BadRequestException("endDate must use YYYY-MM-DD format.");
+    if (endDate && !isValidDateOnly(endDate)) throw new BadRequestException("endDate must use YYYY-MM-DD format.");
     if (endDate && endDate < startDate) throw new BadRequestException("endDate must be on or after startDate.");
     const format = optionalText(body, "format", 40);
     const venue = optionalText(body, "venue", 160);
@@ -102,8 +103,8 @@ export class OrganizationsService {
     if (teamCount !== null && (!Number.isInteger(teamCount) || teamCount < 2 || teamCount > 1000)) throw new BadRequestException("teamCount must be a whole number between 2 and 1000.");
     const id = randomUUID();
     const result = await this.neo4j.run(`
-      MATCH (actor:User {id:$userId})-[role:ORG_MEMBER]->(o:Organization {id:$organizationId})
-      WHERE role.role IN ['OWNER','ADMIN']
+      MATCH (actor:User {id:$userId}), (o:Organization {id:$organizationId})
+      WHERE actor.role='ADMIN'
       CREATE (t:Tournament {id:$id, name:$name, description:$description, sportKey:$sportKey, format:$format, teamCount:$teamCount, endDate:$endDate, venue:$venue, category:$category, gender:$gender, ageGroup:$ageGroup, status:'UPCOMING', startDate:$startDate, createdAt:datetime()})
       CREATE (o)-[:ORGANIZES]->(t)
       CREATE (actor)-[:TOURNAMENT_ADMIN {role:'OWNER', assignedAt:datetime()}]->(t)
@@ -115,13 +116,19 @@ export class OrganizationsService {
   }
 
   async requireOrganizationAdmin(userId: string, organizationId: string) {
-    const result = await this.neo4j.run("MATCH (u:User {id:$userId})-[r:ORG_MEMBER]->(o:Organization {id:$organizationId}) WHERE r.role IN ['OWNER','ADMIN'] RETURN o.id AS id", { userId, organizationId });
+    const result = await this.neo4j.run("MATCH (u:User {id:$userId}), (o:Organization {id:$organizationId}) WHERE u.role='ADMIN' OR EXISTS { MATCH (u)-[r:ORG_MEMBER]->(o) WHERE r.role IN ['OWNER','ADMIN'] } RETURN o.id AS id", { userId, organizationId });
     if (!result.records.length) throw new ForbiddenException("Organization admin permission is required.");
   }
 
   private async isOrganizationMember(userId: string, organizationId: string) {
+    if (await this.isPlatformAdmin(userId)) return true;
     const result = await this.neo4j.run("MATCH (u:User {id:$userId})-[:ORG_MEMBER]->(o:Organization {id:$organizationId}) RETURN count(o) > 0 AS member", { userId, organizationId });
     return result.records[0]?.get("member") === true;
+  }
+
+  private async isPlatformAdmin(userId: string) {
+    const result = await this.neo4j.run("MATCH (user:User {id:$userId, role:'ADMIN'}) RETURN user.id AS id", { userId });
+    return result.records.length > 0;
   }
 
   private async requireOrganizationMember(userId: string, organizationId: string) {

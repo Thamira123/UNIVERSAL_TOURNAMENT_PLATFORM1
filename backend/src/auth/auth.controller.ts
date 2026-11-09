@@ -7,9 +7,9 @@ import { CurrentUser, type SessionUser } from "./current-user.decorator";
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
-  @Post("signup") signUp(@Body() body: unknown) { return this.auth.signUp(body); }
-  @Post("login") signIn(@Body() body: unknown) { return this.auth.signIn(body); }
-
   @Get("me") @UseGuards(AuthGuard)
   getProfile(@CurrentUser() user: SessionUser) { return this.auth.profile(user.id); }
+
+  @Post("claim-admin") @UseGuards(AuthGuard)
+  claimAdmin(@Body() body: unknown, @CurrentUser() user: SessionUser) { return this.auth.claimPlatformAdmin(user.id, body); }
 }

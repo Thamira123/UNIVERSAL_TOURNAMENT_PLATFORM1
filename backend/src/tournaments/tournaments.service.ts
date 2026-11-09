@@ -21,21 +21,25 @@ export class TournamentsService {
       OPTIONAL MATCH (organization:Organization)-[:ORGANIZES]->(t)
       RETURN t { .id, .name, .description, .sportKey, .format, .teamCount, .endDate, .venue, .category, .gender, .ageGroup, .status, .startDate, .createdAt } AS tournament,
         organization { .id, .name } AS organization, admins, events,
-        (EXISTS { MATCH (:User {id:$userId})-[:TOURNAMENT_ADMIN]->(t) }
+        (EXISTS { MATCH (:User {id:$userId, role:'ADMIN'}) }
+          OR EXISTS { MATCH (:User {id:$userId})-[:TOURNAMENT_ADMIN]->(t) }
           OR EXISTS { MATCH (:User {id:$userId})-[membership:ORG_MEMBER]->(organization) WHERE membership.role IN ['OWNER','ADMIN'] }) AS canManage,
-        EXISTS { MATCH (:User {id:$userId})-[orgRole:ORG_MEMBER]->(organization) WHERE orgRole.role IN ['OWNER','ADMIN'] } AS canAssignAdmins
+        (EXISTS { MATCH (:User {id:$userId, role:'ADMIN'}) }
+          OR EXISTS { MATCH (:User {id:$userId})-[orgRole:ORG_MEMBER]->(organization) WHERE orgRole.role IN ['OWNER','ADMIN'] }) AS canAssignAdmins,
+        true AS canView
     `, { id, userId });
     const record = result.records[0];
     if (!record) throw new NotFoundException("Tournament not found.");
-    return { tournament: record.get("tournament"), organization: record.get("organization"), admins: record.get("admins"), events: record.get("events"), canManage: record.get("canManage"), canAssignAdmins: record.get("canAssignAdmins") };
+    if (!record.get("canView")) throw new ForbiddenException("You do not have access to this tournament.");
+    return { tournament: record.get("tournament"), organization: record.get("organization"), admins: record.get("canManage") ? record.get("admins") : [], events: record.get("events"), canManage: record.get("canManage"), canAssignAdmins: record.get("canAssignAdmins") };
   }
 
   async addAdmin(id: string, value: unknown, userId: string) {
     const body = inputObject(value);
     const email = textField(body, "email", 254).toLowerCase();
     const result = await this.neo4j.run(`
-      MATCH (actor:User {id:$userId})-[membership:ORG_MEMBER]->(org:Organization)-[:ORGANIZES]->(t:Tournament {id:$id})
-      WHERE membership.role IN ['OWNER','ADMIN']
+      MATCH (actor:User {id:$userId}), (org:Organization)-[:ORGANIZES]->(t:Tournament {id:$id})
+      WHERE actor.role='ADMIN' OR EXISTS { MATCH (actor)-[membership:ORG_MEMBER]->(org) WHERE membership.role IN ['OWNER','ADMIN'] }
       MATCH (member:User {email:$email})
       MERGE (member)-[role:TOURNAMENT_ADMIN]->(t)
       ON CREATE SET role.role='ADMIN', role.assignedAt=datetime()

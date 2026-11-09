@@ -64,7 +64,7 @@ export class EventsService {
     const result = await this.neo4j.run(`
       MATCH (actor:User {id:$userId}), (t:Tournament {id:$tournamentId}), (sport:Sport {key:$sportKey})
       WHERE (t.sportKey IS NULL OR t.sportKey = $sportKey)
-        AND (EXISTS { MATCH (actor)-[:TOURNAMENT_ADMIN]->(t) }
+        AND (actor.role='ADMIN' OR EXISTS { MATCH (actor)-[:TOURNAMENT_ADMIN]->(t) }
           OR EXISTS { MATCH (org:Organization)-[:ORGANIZES]->(t), (actor)-[membership:ORG_MEMBER]->(org) WHERE membership.role IN ['OWNER','ADMIN'] })
       SET t.sportKey = coalesce(t.sportKey, $sportKey)
       CREATE (event:Event {id:$id, name:$name, sportKey:$sportKey, category:$category, description:$description, status:'DRAFT', createdAt:datetime()})
@@ -77,7 +77,16 @@ export class EventsService {
     return event;
   }
 
-  async getOne(id: string) {
+  async getOne(id: string, userId: string) {
+    const access = await this.neo4j.run(`
+      MATCH (user:User {id:$userId}), (event:Event {id:$id})<-[:HAS_EVENT]-(t:Tournament)
+      WHERE user.role='ADMIN'
+        OR EXISTS { MATCH (user)-[:TOURNAMENT_ADMIN]->(t) }
+        OR EXISTS { MATCH (user)-[membership:ORG_MEMBER]->(:Organization)-[:ORGANIZES]->(t) WHERE membership.role IN ['OWNER','ADMIN'] }
+        OR EXISTS { MATCH (user)-[:TOURNAMENT_REQUESTER]->(t) }
+      RETURN event.id AS id
+    `, { id, userId });
+    if (!access.records.length) throw new ForbiddenException("You do not have access to this event.");
     const details = await this.neo4j.run(`
       MATCH (event:Event {id:$id})
       OPTIONAL MATCH (t:Tournament)-[:HAS_EVENT]->(event)
@@ -112,7 +121,7 @@ export class EventsService {
     if (name === null && category === null && description === null) throw new BadRequestException("Provide at least one event field to update.");
     const result = await this.neo4j.run(`
       MATCH (actor:User {id:$userId}), (event:Event {id:$id})<-[:HAS_EVENT]-(t:Tournament)
-      WHERE EXISTS { MATCH (actor)-[:TOURNAMENT_ADMIN]->(t) }
+      WHERE actor.role='ADMIN' OR EXISTS { MATCH (actor)-[:TOURNAMENT_ADMIN]->(t) }
         OR EXISTS { MATCH (org:Organization)-[:ORGANIZES]->(t), (actor)-[membership:ORG_MEMBER]->(org) WHERE membership.role IN ['OWNER','ADMIN'] }
       SET event.name=coalesce($name,event.name), event.category=coalesce($category,event.category), event.description=coalesce($description,event.description), event.updatedAt=datetime()
       RETURN event { .id, .name, .sportKey, .category, .description, .status } AS event
@@ -142,7 +151,7 @@ export class EventsService {
     const id = randomUUID();
     const result = await this.neo4j.run(`
       MATCH (actor:User {id:$userId}), (event:Event {id:$eventId})<-[:HAS_EVENT]-(t:Tournament)
-      WHERE (EXISTS { MATCH (actor)-[:TOURNAMENT_ADMIN]->(t) }
+      WHERE (actor.role='ADMIN' OR EXISTS { MATCH (actor)-[:TOURNAMENT_ADMIN]->(t) }
         OR EXISTS { MATCH (org:Organization)-[:ORGANIZES]->(t), (actor)-[membership:ORG_MEMBER]->(org) WHERE membership.role IN ['OWNER','ADMIN'] })
         AND NOT EXISTS { MATCH (event)-[:HAS_STAGE {order:$order}]->(:Stage) }
       CREATE (stage:Stage {id:$id, name:$name, format:$format, order:$order, groupCount:$groupCount, participantsPerGroup:$participantsPerGroup, advanceCount:$advanceCount, createdAt:datetime()})
@@ -164,7 +173,8 @@ export class EventsService {
 
     return this.neo4j.run(
       `MATCH (event:Event)-[:HAS_STAGE]->(stage:Stage {id: $stageId}), (tournament:Tournament)-[:HAS_EVENT]->(event)
-       WHERE (EXISTS { MATCH (user:User {id: $userId})-[:TOURNAMENT_ADMIN]->(tournament) }
+       WHERE (EXISTS { MATCH (user:User {id:$userId, role:'ADMIN'}) }
+         OR EXISTS { MATCH (user:User {id: $userId})-[:TOURNAMENT_ADMIN]->(tournament) }
          OR EXISTS { MATCH (user:User {id: $userId})-[membership:ORG_MEMBER]->(:Organization)-[:ORGANIZES]->(tournament) WHERE membership.role IN ['OWNER', 'ADMIN'] })
          AND NOT EXISTS { MATCH (stage)-[:HAS_ROUND]->(:Round {order: $order}) }
        CREATE (round:Round {id: randomUUID(), name: $name, order: $order})

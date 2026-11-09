@@ -44,11 +44,13 @@ export class Neo4jService implements OnApplicationShutdown, OnModuleInit {
     const session = this.driver.session({ database: this.database });
     try {
       await session.run("CREATE CONSTRAINT user_email_unique IF NOT EXISTS FOR (u:User) REQUIRE u.email IS UNIQUE");
+      await session.run("CREATE CONSTRAINT user_clerk_id_unique IF NOT EXISTS FOR (u:User) REQUIRE u.clerkId IS UNIQUE");
       await session.run("CREATE CONSTRAINT organization_id_unique IF NOT EXISTS FOR (o:Organization) REQUIRE o.id IS UNIQUE");
       await session.run("CREATE CONSTRAINT tournament_id_unique IF NOT EXISTS FOR (t:Tournament) REQUIRE t.id IS UNIQUE");
       await session.run("CREATE CONSTRAINT event_id_unique IF NOT EXISTS FOR (e:Event) REQUIRE e.id IS UNIQUE");
       await session.run("CREATE CONSTRAINT stage_id_unique IF NOT EXISTS FOR (s:Stage) REQUIRE s.id IS UNIQUE");
       await session.run("CREATE CONSTRAINT sport_key_unique IF NOT EXISTS FOR (s:Sport) REQUIRE s.key IS UNIQUE");
+      await session.run("CREATE CONSTRAINT tournament_request_id_unique IF NOT EXISTS FOR (r:TournamentRequest) REQUIRE r.id IS UNIQUE");
       await session.run("MERGE (s:Sport {key:'cricket'}) SET s.name='Cricket', s.type='TEAM'");
       await session.run("MERGE (s:Sport {key:'high-jump'}) SET s.name='High Jump', s.type='INDIVIDUAL'");
     } finally {
