@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -30,10 +30,10 @@ const nextModules = [
 ];
 
 const sportsNews = [
-  { number: "01", sport: "CRICKET · ASIAN GAMES", date: "03 OCT 2026", title: "India take men’s cricket gold", detail: "India beat Pakistan in the final to claim the men’s cricket gold medal at the 2026 Asian Games.", source: "ICC", href: "https://www.icc-cricket.com/news/india-defeat-pakistan-to-clinch-asian-games-gold", mark: "GOLD" },
-  { number: "02", sport: "CRICKET · WORLD CUP 2027", date: "01 OCT 2026", title: "World Cup schedule revealed", detail: "The 2027 tournament will bring 14 teams and 57 matches to South Africa, Zimbabwe and Namibia.", source: "ICC", href: "https://www.icc-cricket.com/news/fixture-schedule-announced-for-icc-men-s-cricket-world-cup-2027", mark: "’27" },
-  { number: "03", sport: "CRICKET · TEST SERIES", date: "13 OCT 2026", title: "Australia win in Durban", detail: "Josh Hazlewood led Australia to a 214-run victory over South Africa in the first Test.", source: "Al Jazeera", href: "https://www.aljazeera.com/sports/2026/10/13/australia-bowl-out-south-africa-to-win-first-test-in-durban", mark: "214" },
-  { number: "04", sport: "RUGBY LEAGUE · WORLD CUP", date: "15 OCT 2026", title: "A thrilling World Cup opener", detail: "Jack Bostock’s debut hat-trick helped Australia edge New Zealand 24–22 in front of a record crowd.", source: "NRL", href: "https://www.nrl.com/news/2026/10/15/jumping-jacks-flash-bostock-bags-three-on-debut-as-roos-salute/", mark: "24–22" },
+  { number: "01", sport: "RUGBY SEVENS · YOUTH OLYMPICS", date: "04 NOV 2026", title: "Kenya win rugby gold in a golden-point finish", detail: "Mitchelle Chemtai scored in extra time to beat Australia, while Madagascar earned its first Olympic medal.", source: "HSBC SVNS", href: "https://www.svns.com/en/news/1048932/youth-olympic-gamesgolden-point-winner-starts-kenya-celebrations-in-dakar", mark: "GOLD" },
+  { number: "02", sport: "CRICKET · WORLD CUP 2027", date: "02 NOV 2026", title: "World Cup ticket requests top 120 million", detail: "Fans from 193 countries have registered interest in the 2027 Cricket World Cup across Africa.", source: "ICC", href: "https://www.icc-cricket.com/tournaments/icc-cricket-world-cup-2027/news/cwc27-fever-builds-as-ticket-ballot-applications-soar", mark: "120M" },
+  { number: "03", sport: "ATHLETICS · NEW YORK MARATHON", date: "01 NOV 2026", title: "Almgren wins New York Marathon on debut", detail: "Andreas Almgren won the men's race in 2:06:01, while Sheila Chepkirui claimed her second women's title.", source: "World Athletics", href: "https://worldathletics.org/news/report/new-york-city-marathon-2026-almgren-chepkirui", mark: "2:06" },
+  { number: "04", sport: "CRICKET · ODI TRI-SERIES", date: "31 OCT 2026", title: "Pakistan beat Sri Lanka to take tri-series", detail: "Fakhar Zaman's century helped Pakistan chase 326 and win the Lahore final by three wickets.", source: "ICC", href: "https://www.icc-cricket.com/news/pakistan-clinch-tri-series-with-big-chase-against-sri-lanka", mark: "326" },
 ];
 
 export default function Home() {
@@ -60,15 +60,15 @@ export default function Home() {
 
   return (
     <main className="utms-home">
-      <div className="announcement"><span className="announcement-dot" /> UNIVERSAL TOURNAMENT MANAGEMENT PLATFORM <a href="#workflow">Explore the platform <span aria-hidden="true">↗</span></a></div>
+      <div className="announcement"><span className="announcement-dot" /> UNIVERSAL TOURNAMENT MANAGEMENT PLATFORM</div>
       <header className="site-header">
-        <Link className="brand utms-brand" href="/" aria-label="UTMS home"><span className="brand-mark">U</span><span>UTMS<span className="brand-period">.</span></span></Link>
+        <Link className="brand utms-brand" href="/" aria-label="UTMP home"><span className="brand-mark">U</span><span>UTMP<span className="brand-period">.</span></span></Link>
         <nav className="main-nav" aria-label="Main navigation">
-          <Link href="/sports">Sports</Link><a href="#sports-news">News</a><a href="#workflow">How it works</a><a href="#roadmap">2026 roadmap</a>
+          <Link href="/sports">Sports</Link><Link href="/analytics">Analytics</Link><a href="#sports-news">News</a><a href="#workflow">How it works</a>
         </nav>
-        <div className="header-actions">{isSignedIn ? <Link className="utms-header-cta" href="/profile">My workspace <span aria-hidden="true">↗</span></Link> : <><Link className="sign-in" href="/login">Sign in</Link><Link className="utms-header-cta" href="/signup">Get started <span aria-hidden="true">↗</span></Link></>}<button className="menu-button" aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)} type="button">{menuOpen ? "×" : "☰"}</button></div>
+        <div className="header-actions">{isSignedIn ? <><Link className="sign-in" href="/account">Account</Link><Link className="utms-header-cta" href="/profile">My workspace <span aria-hidden="true">↗</span></Link></> : <><Link className="sign-in" href="/login">Sign in</Link><Link className="utms-header-cta" href="/signup">Get started <span aria-hidden="true">↗</span></Link></>}<button className="menu-button" aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)} type="button">{menuOpen ? "×" : "☰"}</button></div>
       </header>
-      {menuOpen && <nav className="mobile-menu" aria-label="Mobile navigation"><Link onClick={() => setMenuOpen(false)} href="/sports">Sports</Link><a onClick={() => setMenuOpen(false)} href="#sports-news">News</a><a onClick={() => setMenuOpen(false)} href="#workflow">How it works</a><a onClick={() => setMenuOpen(false)} href="#roadmap">2026 roadmap</a>{isSignedIn ? <Link onClick={() => setMenuOpen(false)} href="/profile">My workspace</Link> : <><Link onClick={() => setMenuOpen(false)} href="/login">Sign in</Link><Link onClick={() => setMenuOpen(false)} href="/signup">Get started</Link></>}</nav>}
+      {menuOpen && <nav className="mobile-menu" aria-label="Mobile navigation"><Link onClick={() => setMenuOpen(false)} href="/sports">Sports</Link><Link onClick={() => setMenuOpen(false)} href="/analytics">Analytics</Link><a onClick={() => setMenuOpen(false)} href="#sports-news">News</a><a onClick={() => setMenuOpen(false)} href="#workflow">How it works</a>{isSignedIn ? <><Link onClick={() => setMenuOpen(false)} href="/account">Account settings</Link><Link onClick={() => setMenuOpen(false)} href="/profile">My workspace</Link></> : <><Link onClick={() => setMenuOpen(false)} href="/login">Sign in</Link><Link onClick={() => setMenuOpen(false)} href="/signup">Get started</Link></>}</nav>}
 
       <section className="hero utms-hero" id="top" aria-label="Universal Tournament sports platform">
         <div className="hero-image" aria-hidden="true">{banners.map((banner, index) => <Image className={`hero-banner-image hero-banner-image-${banner.key}${index === activeBanner ? " hero-banner-image-active" : ""}`} src={banner.image} alt="" fill sizes="100vw" priority={index === 0} key={banner.key} />)}</div>
@@ -80,14 +80,14 @@ export default function Home() {
           <div className="utms-hero-proof"><span>01 <b>ORGANIZATION</b></span><i /><span>02 <b>TOURNAMENT</b></span><i /><span>03 <b>EVENTS & STAGES</b></span></div>
         </div>
         <div className="utms-banner-controls" role="group" aria-label="Featured banner controls"><button type="button" onClick={() => setActiveBanner((activeBanner + banners.length - 1) % banners.length)} aria-label="Previous banner">←</button><span aria-live="polite">0{activeBanner + 1} <i>/</i> 0{banners.length}</span>{banners.map((banner, index) => <button className={`utms-banner-dot${index === activeBanner ? " utms-banner-dot-active" : ""}`} type="button" key={banner.key} onClick={() => setActiveBanner(index)} aria-label={`Show ${banner.label} banner`} aria-pressed={index === activeBanner} />)}<button type="button" onClick={() => setActiveBanner((activeBanner + 1) % banners.length)} aria-label="Next banner">→</button></div>
-        <div className="hero-caption"><span>UTMS / 2026</span><i /> ORGANIZE · COMPETE · GROW</div>
+        <div className="hero-caption"><span>UTMP / 2026</span><i /> ORGANIZE · COMPETE · GROW</div>
       </section>
 
       <section className="stat-strip utms-stats" aria-label="Platform overview"><div><strong>02</strong><span>SUPPORTED SPORTS</span></div><div><strong>04</strong><span>CORE WORKSPACE STEPS</span></div><div><strong>01</strong><span>ACCOUNT FOR YOUR WORK</span></div><div className="stat-note">BUILT AROUND<br />YOUR TOURNAMENT <span>↘</span></div></section>
 
       <section className="section utms-news-section" id="sports-news">
-        <div className="section-heading utms-news-heading"><div><p className="eyebrow">SPORTS DESK · OCTOBER 2026</p><h2>Good things <em>happening.</em></h2><p>Recent moments and milestones from the world of sport.</p></div><span className="utms-news-count">04 <small>STORIES</small></span></div>
-        <div className="utms-news-grid">{sportsNews.map((item) => <a className="utms-news-card" href={item.href} key={item.number} target="_blank" rel="noreferrer"><div className="utms-news-card-top"><span>{item.sport}</span><i>{item.number}</i></div><div className="utms-news-art" aria-hidden="true"><span>{item.mark}</span><b>UTMS / SPORT</b></div><div className="utms-news-copy"><time>{item.date}</time><h3>{item.title}</h3><p>{item.detail}</p><span className="utms-news-source">Read at {item.source} <b>↗</b></span></div></a>)}</div>
+        <div className="section-heading utms-news-heading"><div><p className="eyebrow">SPORTS DESK · NOVEMBER 2026</p><h2>Good things <em>happening.</em></h2><p>Recent results and stories from around the world of sport.</p></div><span className="utms-news-count">04 <small>STORIES</small></span></div>
+        <div className="utms-news-grid">{sportsNews.map((item) => <a className="utms-news-card" href={item.href} key={item.number} target="_blank" rel="noreferrer"><div className="utms-news-card-top"><span>{item.sport}</span><i>{item.number}</i></div><div className="utms-news-art" aria-hidden="true"><span>{item.mark}</span><b>UTMP / SPORT</b></div><div className="utms-news-copy"><time>{item.date}</time><h3>{item.title}</h3><p>{item.detail}</p><span className="utms-news-source">Read at {item.source} <b>↗</b></span></div></a>)}</div>
       </section>
 
       <section className="section sports-section utms-sports" id="sports">
@@ -112,9 +112,9 @@ export default function Home() {
         <div className="utms-roadmap-connector" aria-hidden="true"><span>TEAMS</span><i>→</i><span>MATCHES</span><i>→</i><span>RANKING</span><i>→</i><span>BRACKET</span><i>→</i><span>PERFORMANCE HISTORY</span></div>
       </section>
 
-      <section className="community-section utms-final-cta" id="create"><div className="community-orbit" /><div><p className="eyebrow">YOUR TOURNAMENT STARTS HERE</p><h2>Bring every<br /><em>event together.</em></h2><p>Create your account, set up an organization, and build your first tournament workspace.</p><Link className="button-light" href="/signup">Get started <span className="arrow">→</span></Link></div><div className="community-side"><span>UNIVERSAL TOURNAMENT<br />MANAGEMENT PLATFORM</span><strong>UTMS<span>.</span></strong><span>ORGANIZE · COMPETE · GROW</span></div></section>
+      <section className="community-section utms-final-cta" id="create"><div className="community-orbit" /><div><p className="eyebrow">YOUR TOURNAMENT STARTS HERE</p><h2>Bring every<br /><em>event together.</em></h2><p>Create your account, set up an organization, and build your first tournament workspace.</p><Link className="button-light" href="/signup">Get started <span className="arrow">→</span></Link></div><div className="community-side"><span>UNIVERSAL TOURNAMENT<br />MANAGEMENT PLATFORM</span><strong>UTMP<span>.</span></strong><span>ORGANIZE · COMPETE · GROW</span></div></section>
 
-      <footer className="site-footer utms-footer"><div className="footer-main"><Link className="brand utms-brand" href="/"><span className="brand-mark">U</span><span>UTMS<span className="brand-period">.</span></span></Link><p>One platform to manage every tournament.</p><div className="footer-links"><a href="#sports">Sports</a><a href="#workflow">How it works</a><a href="#roadmap">2026 roadmap</a><Link href="/login">Sign in</Link></div><a className="back-top" href="#top">BACK TO TOP ↗</a></div><div className="footer-bottom"><span>© 2026 UTMS</span><span>CRICKET · HIGH JUMP · MORE TO COME</span><span>TOURNAMENTS, ORGANIZED</span></div></footer>
+      <footer className="site-footer utms-footer"><div className="footer-main"><Link className="brand utms-brand" href="/"><span className="brand-mark">U</span><span>UTMP<span className="brand-period">.</span></span></Link><p>One platform to manage every tournament.</p><div className="footer-links"><a href="#sports">Sports</a><a href="#workflow">How it works</a><a href="#roadmap">2026 roadmap</a><Link href="/login">Sign in</Link></div><a className="back-top" href="#top">BACK TO TOP ↗</a></div><div className="footer-bottom"><span>© 2026 UTMP</span><span>CRICKET · HIGH JUMP · MORE TO COME</span><span>TOURNAMENTS, ORGANIZED</span></div></footer>
     </main>
   );
 }

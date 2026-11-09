@@ -16,25 +16,26 @@ export function AppShell({ children, title, subtitle }: { children: React.ReactN
   return (
     <main className="workspace-page">
       <header className="workspace-header">
-        <Link className="brand workspace-brand" href="/" aria-label="UTMS home">
-          <span className="brand-mark">U</span><span>UTMS<span className="brand-period">.</span><small>TOURNAMENT MANAGEMENT</small></span>
+        <Link className="brand workspace-brand" href="/" aria-label="UTMP home">
+          <span className="brand-mark">U</span><span>UTMP<span className="brand-period">.</span><small>TOURNAMENT MANAGEMENT</small></span>
         </Link>
         <nav aria-label="Workspace navigation">
           <Link aria-current={pathname === "/sports" || pathname.startsWith("/sports/") ? "page" : undefined} href="/sports">Sports</Link>
           <Link aria-current={pathname === "/profile" ? "page" : undefined} href="/profile">My profile</Link>
+          <Link aria-current={pathname === "/account" ? "page" : undefined} href="/account">Account settings</Link>
           <Link className="workspace-nav-secondary" aria-current={pathname === "/organizations/new" ? "page" : undefined} href="/organizations/new">New organization</Link>
           <button onClick={signOut} type="button">Sign out <span aria-hidden="true">↗</span></button>
         </nav>
       </header>
       <section className="workspace-content">
         <div className="workspace-heading">
-          <p className="eyebrow">UTMS <span aria-hidden="true">/</span> TOURNAMENT WORKSPACE</p>
+          <p className="eyebrow">UTMP <span aria-hidden="true">/</span> TOURNAMENT WORKSPACE</p>
           <h1>{title}</h1>
           {subtitle && <p>{subtitle}</p>}
         </div>
         {children}
       </section>
-      <footer className="workspace-footer"><span>UNIVERSAL TOURNAMENT MANAGEMENT PLATFORM · 2026</span><Link href="/">Back to UTMS home <span aria-hidden="true">↑</span></Link></footer>
+      <footer className="workspace-footer"><span>UNIVERSAL TOURNAMENT MANAGEMENT PLATFORM · 2026</span><Link href="/">Back to UTMP home <span aria-hidden="true">↑</span></Link></footer>
     </main>
   );
 }
