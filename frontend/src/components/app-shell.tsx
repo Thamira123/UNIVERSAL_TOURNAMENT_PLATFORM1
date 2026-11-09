@@ -7,7 +7,6 @@ import { clearAccessToken } from "@/lib/api";
 export function AppShell({ children, title, subtitle }: { children: React.ReactNode; title: string; subtitle?: string }) {
   const router = useRouter();
   const pathname = usePathname();
-  const tournamentId = pathname.match(/^\/tournaments\/([^/]+)/)?.[1];
 
   function signOut() {
     clearAccessToken();
@@ -28,11 +27,6 @@ export function AppShell({ children, title, subtitle }: { children: React.ReactN
           <button onClick={signOut} type="button">Sign out <span aria-hidden="true">↗</span></button>
         </nav>
       </header>
-      {tournamentId && <nav className="tournament-tools-nav" aria-label="Tournament tools">
-        <Link aria-current={pathname === `/tournaments/${tournamentId}` ? "page" : undefined} href={`/tournaments/${tournamentId}`}>Overview</Link>
-        <Link aria-current={pathname === `/tournaments/${tournamentId}/teams` ? "page" : undefined} href={`/tournaments/${tournamentId}/teams`}>Teams</Link>
-        <Link aria-current={pathname === `/tournaments/${tournamentId}/matches` ? "page" : undefined} href={`/tournaments/${tournamentId}/matches`}>Matches</Link>
-      </nav>}
       <section className="workspace-content">
         <div className="workspace-heading">
           <p className="eyebrow">UTMP <span aria-hidden="true">/</span> TOURNAMENT WORKSPACE</p>
